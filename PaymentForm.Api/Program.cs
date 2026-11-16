@@ -4,6 +4,8 @@ using PaymentForm.Api.Data;
 using PaymentForm.Api.Repositories;
 using PaymentForm.Api.Security;
 using PaymentForm.Api.Services;
+using PaymentForm.Api.ExceptionHandling;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Payments")
@@ -13,7 +15,11 @@ builder.Services.AddDbContext<PaymentsDbContext>(options => options.UseSqlite(co
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+// Exception handling
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<PaymentExceptionHandler>();
 builder.Services.AddExceptionHandler(_ => { });
+
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
@@ -34,6 +40,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 // Auto-apply migrations on startup
 using (var scope = app.Services.CreateScope())
 {
@@ -41,7 +49,6 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
-app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

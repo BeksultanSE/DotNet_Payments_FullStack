@@ -59,6 +59,7 @@ async function loadHistory() {
                             <th>Date</th>
                             <th>Account</th>
                             <th>Email</th>
+                            <th>Phone</th>
                             <th>Amount</th>
                             <th>Currency</th>
                             <th>Status</th>
@@ -71,6 +72,7 @@ async function loadHistory() {
                                 <td>${formatDate(p.createdAt)}</td>
                                 <td>${escapeHtml(p.account)}</td>
                                 <td class="email">${escapeHtml(p.email)}</td>
+                                <td>${escapeHtml(p.phone || '—')}</td>
                                 <td class="amount">${formatAmount(p.amount)}</td>
                                 <td><span class="currency-symbol">${escapeHtml(p.currency)}</span></td>
                                 <td>

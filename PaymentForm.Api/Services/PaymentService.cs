@@ -1,5 +1,6 @@
 using PaymentForm.Api.Models;
 using PaymentForm.Api.Repositories;
+using PaymentForm.Api.Validation;
 
 namespace PaymentForm.Api.Services;
 
@@ -7,13 +8,23 @@ public sealed class PaymentService(IPaymentRepository repository, TimeProvider t
 {
     public async Task<PaymentResponse> CreateAsync(CreatePaymentRequest request, CancellationToken cancellationToken)
     {
+
+        // Validate optional phone
+        if (!string.IsNullOrWhiteSpace(request.Phone) &&
+            !PhoneNumberValidator.IsValid(request.Phone))
+        {
+            throw new PaymentValidationException(
+                "Invalid phone number."
+            );
+        }
+
         var payment = new Payment
         {
             Id = Guid.NewGuid(),
             WalletNumber = request.WalletNumber.Trim(),
             Account = request.Account.Trim(),
             Email = request.Email.Trim(),
-            Phone = string.IsNullOrWhiteSpace(request.Phone) ? null : request.Phone.Trim(),
+            Phone = string.IsNullOrWhiteSpace(request.Phone) ? null : PhoneNumberValidator.Normalize(request.Phone),
             Amount = request.Amount,
             Currency = request.Currency.Trim().ToUpperInvariant(),
             Comment = string.IsNullOrWhiteSpace(request.Comment) ? null : request.Comment.Trim(),
